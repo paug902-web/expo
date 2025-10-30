@@ -4,12 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { isValidElement, type ReactElement, type ReactNode } from 'react';
 import type { ImageSourcePropType } from 'react-native';
 
-import { NativeTabsTriggerTabBar } from './NativeTabsTriggerTabBar';
-import type {
-  NativeTabOptions,
-  NativeTabsTriggerTabBarProps,
-  NativeTabTriggerProps,
-} from './types';
+import type { NativeTabOptions, NativeTabTriggerProps } from './types';
 import { filterAllowedChildrenElements, isChildOfType } from './utils';
 import { useIsPreview } from '../link/preview/PreviewRouteContext';
 import { useSafeLayoutEffect } from '../views/useSafeLayoutEffect';
@@ -89,9 +84,7 @@ function NativeTabTriggerImpl(props: NativeTabTriggerProps) {
   return null;
 }
 
-export const NativeTabTrigger = Object.assign(NativeTabTriggerImpl, {
-  TabBar: NativeTabsTriggerTabBar,
-});
+export const NativeTabTrigger = NativeTabTriggerImpl;
 
 export function convertTabPropsToOptions(
   {
@@ -119,12 +112,7 @@ export function convertTabPropsToOptions(
         role,
         nativeProps: unstable_nativeProps,
       };
-  const allowedChildren = filterAllowedChildrenElements(children, [
-    Badge,
-    Label,
-    Icon,
-    NativeTabsTriggerTabBar,
-  ]);
+  const allowedChildren = filterAllowedChildrenElements(children, [Badge, Label, Icon]);
   return allowedChildren.reduce<NativeTabOptions>(
     (acc, child) => {
       if (isChildOfType(child, Badge)) {
@@ -133,8 +121,6 @@ export function convertTabPropsToOptions(
         appendLabelOptions(acc, child.props);
       } else if (isChildOfType(child, Icon)) {
         appendIconOptions(acc, child.props);
-      } else if (isChildOfType(child, NativeTabsTriggerTabBar)) {
-        appendTabBarOptions(acc, child.props);
       }
       return acc;
     },
@@ -235,52 +221,6 @@ function convertSrcOrComponentToSrc(src: ImageSourcePropType | ReactElement | un
     }
   }
   return undefined;
-}
-
-function appendTabBarOptions(options: NativeTabOptions, props: NativeTabsTriggerTabBarProps) {
-  const {
-    backgroundColor,
-    blurEffect,
-    iconColor,
-    disableTransparentOnScrollEdge,
-    badgeBackgroundColor,
-    badgeTextColor,
-    indicatorColor,
-    labelStyle,
-    shadowColor,
-  } = props;
-
-  if (backgroundColor) {
-    options.backgroundColor = backgroundColor;
-  }
-  // We need better native integration of this on Android
-  // Simulating from JS side creates ugly transitions
-  if (process.env.EXPO_OS !== 'android') {
-    if (blurEffect) {
-      options.blurEffect = blurEffect;
-    }
-    if (shadowColor) {
-      options.shadowColor = shadowColor;
-    }
-    if (iconColor) {
-      options.iconColor = iconColor;
-    }
-    if (disableTransparentOnScrollEdge !== undefined) {
-      options.disableTransparentOnScrollEdge = disableTransparentOnScrollEdge;
-    }
-    if (badgeBackgroundColor) {
-      options.badgeBackgroundColor = badgeBackgroundColor;
-    }
-    if (badgeTextColor) {
-      options.badgeTextColor = badgeTextColor;
-    }
-    if (indicatorColor) {
-      options.indicatorColor = indicatorColor;
-    }
-    if (labelStyle) {
-      options.labelStyle = labelStyle;
-    }
-  }
 }
 
 export function isNativeTabTrigger(
